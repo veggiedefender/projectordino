@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "@tensorflow-models/posenet": "^2.2.1",
-    "@tensorflow/tfjs": "^2.7.0"
+    "@tensorflow/tfjs": "^2.7.0",
+    "change-perspective": "^1.0.1"
   },
   "devDependencies": {
     "@types/html-webpack-plugin": "^3.2.3",

@@ -927,6 +927,11 @@ chalk@^4.1.0:
     ansi-styles "^4.1.0"
     supports-color "^7.1.0"
 
+change-perspective@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/change-perspective/-/change-perspective-1.0.1.tgz#537409f59eb930ac3a97ee77b998d1e523e6a00c"
+  integrity sha512-x2w4Zv6lCAv85RXVSVFsL5MpOe1SveXyVmIcoT6RN+Kij22V9U8oNzzd4hxAmoZpvyK+/mUS0/2upGxu/FV09g==
+
 chokidar@^2.1.8:
   version "2.1.8"
   resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-2.1.8.tgz#804b3a7b6a99358c3c5c61e71d8728f041cff917"
