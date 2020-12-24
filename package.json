@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "build": "webpack --mode production",
-    "start": "webpack-dev-server --open"
+    "start": "webpack-dev-server"
   },
   "dependencies": {
     "@tensorflow-models/posenet": "^2.2.1",
