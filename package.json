@@ -7,7 +7,10 @@
     "build": "webpack --mode production",
     "start": "webpack-dev-server --open"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@tensorflow-models/posenet": "^2.2.1",
+    "@tensorflow/tfjs": "^2.7.0"
+  },
   "devDependencies": {
     "@types/html-webpack-plugin": "^3.2.3",
     "copy-webpack-plugin": "^6.2.1",

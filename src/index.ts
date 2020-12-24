@@ -1,3 +1,5 @@
+import * as posenet from '@tensorflow-models/posenet'
+
 import './style.css'
 import { Runner } from './chrome-dino'
 
