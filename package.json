@@ -10,10 +10,12 @@
   "dependencies": {
     "@tensorflow-models/posenet": "^2.2.1",
     "@tensorflow/tfjs": "^2.7.0",
-    "change-perspective": "^1.0.1"
+    "change-perspective": "^1.0.1",
+    "intersects": "^2.7.2"
   },
   "devDependencies": {
     "@types/html-webpack-plugin": "^3.2.3",
+    "@types/intersects": "^2.5.0",
     "copy-webpack-plugin": "^6.2.1",
     "css-loader": "^4.0.0",
     "html-webpack-plugin": "^4.3.0",
