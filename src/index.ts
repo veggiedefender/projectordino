@@ -1,4 +1,5 @@
 import { QuadPoints } from 'change-perspective'
+import interact from 'interactjs'
 
 import { Runner } from './chrome-dino'
 import { createPoseEstimator } from './pose'
@@ -29,6 +30,34 @@ async function main() {
   drawCalibrationTarget(runner.canvasCtx, 560, 30)
   drawCalibrationTarget(runner.canvasCtx, 560, 120)
   drawCalibrationTarget(runner.canvasCtx, 40, 120)
+
+  const position = { x: 0, y: 0, scale: 1.0 }
+  interact('#game-container')
+    .draggable({
+      listeners: {
+        move(event) {
+          position.x += event.dx
+          position.y += event.dy
+          event.target.style.transform = `translate(${position.x}px, ${position.y}px) scale(${position.scale})`
+        },
+      },
+    })
+    .resizable({
+      modifiers: [
+        interact.modifiers.aspectRatio({
+          ratio: 600 / 150,
+        }),
+      ],
+      edges: { top: true, left: true, bottom: true, right: true },
+      listeners: {
+        move(event) {
+          position.x += event.deltaRect.left
+          position.y += event.deltaRect.top
+          position.scale = event.rect.width / 600
+          event.target.style.transform = `translate(${position.x}px, ${position.y}px) scale(${position.scale})`
+        },
+      },
+    })
 
   window.addEventListener('message', function (e) {
     if (!(e.data.type && e.data.type === 'coords')) {

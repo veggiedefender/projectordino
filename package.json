@@ -11,6 +11,7 @@
     "@tensorflow-models/posenet": "^2.2.1",
     "@tensorflow/tfjs": "^2.7.0",
     "change-perspective": "^1.0.1",
+    "interactjs": "^1.10.1",
     "intersects": "^2.7.2"
   },
   "devDependencies": {

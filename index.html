@@ -7,6 +7,7 @@
       body {
         font-family: sans-serif;
         background-color: black;
+        overflow: hidden;
       }
 
       #offline-resources,
@@ -17,8 +18,8 @@
       #game-container {
         width: 600px;
         transform-origin: top left;
-        /* Edit the transform in devtools to align with your room */
-        transform: translate(0px, 221px) scale(2.1) rotate(0deg);
+        touch-action: none;
+        box-sizing: border-box;
       }
 
       #game {
