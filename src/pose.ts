@@ -14,19 +14,39 @@ type boundingBox = {
 }
 
 export class PoseEstimator {
-  private transform: perspectiveTransformer
+  private transform: perspectiveTransformer = (x, y) => [x, y]
   private dstCorners: QuadPoints = [40, 30, 560, 30, 560, 120, 40, 120]
 
-  constructor(private video: HTMLVideoElement, private net: posenet.PoseNet) {
-    this.setCalibrationPoints([131, 350, 575, 347, 573, 423, 134, 425])
-  }
+  constructor(private video: HTMLVideoElement, private net: posenet.PoseNet) {}
 
+  /**
+   * calculates the pose in the current frame from the webcam, and corrects the perspective to
+   * match the game's coordinates
+   */
   async estimate() {
     const webcamPose = await this.net.estimateSinglePose(this.video)
-    const projectedPose = transformPose(this.transform, webcamPose) // perspective corrected
+    const projectedPose = {
+      ...webcamPose,
+      keypoints: webcamPose.keypoints.map(
+        (keypoint): posenet.Keypoint => {
+          const [x, y] = this.transform(
+            keypoint.position.x,
+            keypoint.position.y
+          )
+          return {
+            ...keypoint,
+            position: { x, y },
+          }
+        }
+      ),
+    }
     return new Pose(projectedPose)
   }
 
+  /**
+   * recalculate the perspective transform based on where the calibration markers appear in the
+   * webcam feed
+   */
   setCalibrationPoints(srcCorners: QuadPoints) {
     this.transform = calculatePerspectiveTransform(srcCorners, this.dstCorners)
   }
@@ -38,17 +58,11 @@ export class Pose {
     this.score = pose.score
   }
 
+  /**
+   * calculate bounding box that contains all the points in the pose
+   */
   boundingBox(): boundingBox {
-    const initial = { maxX: 0, maxY: 0, minX: VIDEO_WIDTH, minY: VIDEO_HEIGHT }
-    const box = this.pose.keypoints.reduce(
-      (acc, kpt) => ({
-        maxX: Math.max(kpt.position.x, acc.maxX),
-        maxY: Math.max(kpt.position.y, acc.maxY),
-        minX: Math.min(kpt.position.x, acc.minX),
-        minY: Math.min(kpt.position.y, acc.minY),
-      }),
-      initial
-    )
+    const box = posenet.getBoundingBox(this.pose.keypoints)
     return {
       x: box.minX,
       y: box.minY,
@@ -57,6 +71,9 @@ export class Pose {
     }
   }
 
+  /**
+   * returns true if the pose's skeleton overlaps with the given box
+   */
   skeletonIntersects(box: boundingBox): boolean {
     const adjacentKeyPoints = posenet.getAdjacentKeyPoints(
       this.pose.keypoints,
@@ -83,12 +100,16 @@ export class Pose {
     return false
   }
 
+  /**
+   * draw the skeleton and bounding box onto the canvas
+   */
   drawSkeleton(ctx: CanvasRenderingContext2D) {
     const adjacentKeyPoints = posenet.getAdjacentKeyPoints(
       this.pose.keypoints,
       0.1
     )
 
+    // Draw skeleton
     adjacentKeyPoints.forEach((keypoints) => {
       ctx.beginPath()
       ctx.moveTo(keypoints[0].position.x, keypoints[0].position.y)
@@ -98,6 +119,7 @@ export class Pose {
       ctx.stroke()
     })
 
+    // Draw bounding box
     const { x, y, width, height } = this.boundingBox()
     ctx.rect(x, y, width, height)
     ctx.strokeStyle = 'green'
@@ -116,22 +138,4 @@ export async function createPoseEstimator(): Promise<PoseEstimator> {
     quantBytes: 2,
   })
   return new PoseEstimator(video, net)
-}
-
-function transformPose(
-  transform: perspectiveTransformer,
-  pose: posenet.Pose
-): posenet.Pose {
-  return {
-    ...pose,
-    keypoints: pose.keypoints.map(
-      (keypoint): posenet.Keypoint => {
-        const [x, y] = transform(keypoint.position.x, keypoint.position.y)
-        return {
-          ...keypoint,
-          position: { x, y },
-        }
-      }
-    ),
-  }
 }
