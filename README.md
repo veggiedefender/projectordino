@@ -61,6 +61,6 @@ Then you're ready to play! Press spacebar or the up arrow key to start the game.
 If your frame rate is low, you can try editing the pose estimation model's [configuration](https://github.com/veggiedefender/projectordino/blob/0a97b755f6e49eac8a06d6a6336a2561dd1c3cdc/src/pose.ts#L133-L139). To learn what the parameters do, you can read posenet's [docs](https://github.com/tensorflow/tfjs-models/blob/master/posenet/README.md) or play with the sliders and menus in the [posenet demo](https://storage.googleapis.com/tfjs-models/demos/posenet/camera.html) until you find a combination that gets you acceptable performance.
 
 ## Contributing
-I consider this weekend project basically finished. But feel free to fork this repo or file PRs and issues. If you try this project yourself, I'd love to see the reuslts! Please send pictures and videos to [@__jesse_li](https://twitter.com/__jesse_li) or jessejesse123@gmail.com.
+I consider this weekend project basically finished. But feel free to fork this repo or file PRs and issues. If you try this project yourself, I'd love to see the results! Please send pictures and videos to [@__jesse_li](https://twitter.com/__jesse_li) or jessejesse123@gmail.com.
 
 P.S. Consider joining the [Octo Ring](https://octo-ring.com/), the old-school webring for GitHub.
