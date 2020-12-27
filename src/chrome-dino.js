@@ -2,15 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import { PoseEstimator, Pose } from './pose'
+
 /**
  * T-Rex runner.
  * @param {string} outerContainerId Outer containing element id.
+ * @param {PoseEstimator} poseEstimator
  * @param {!Object=} opt_config
  * @constructor
  * @implements {EventListener}
  * @export
  */
-export function Runner(outerContainerId, opt_config) {
+export function Runner(outerContainerId, poseEstimator, opt_config) {
   // Singleton
   if (Runner.instance_) {
     return Runner.instance_
@@ -18,6 +21,7 @@ export function Runner(outerContainerId, opt_config) {
   Runner.instance_ = this
 
   this.outerContainerEl = document.querySelector(outerContainerId)
+  this.poseEstimator = poseEstimator
   this.containerEl = null
   this.snackbarEl = null
   // A div to intercept touch events. Only set while (playing && useTouch).
@@ -126,7 +130,7 @@ Runner.config = {
   MIN_JUMP_HEIGHT: 35,
   MOBILE_SPEED_COEFFICIENT: 1.2,
   RESOURCE_TEMPLATE_ID: 'audio-resources',
-  SPEED: 6,
+  SPEED: 3,
   SPEED_DROP_COEFFICIENT: 3,
   ARCADE_MODE_INITIAL_TOP_POSITION: 35,
   ARCADE_MODE_TOP_POSITION_PERCENT: 0.1,
@@ -547,9 +551,7 @@ Runner.prototype = {
   /**
    * Update the game frame and schedules the next one.
    */
-  update() {
-    this.updatePending = false
-
+  async update() {
     const now = getTimeStamp()
     let deltaTime = now - (this.time || now)
 
@@ -574,19 +576,18 @@ Runner.prototype = {
       if (this.playingIntro) {
         this.horizon.update(0, this.currentSpeed, hasObstacles)
       } else {
-        const showNightMode = this.isDarkMode ^ this.inverted
         deltaTime = !this.activated ? 0 : deltaTime
-        this.horizon.update(
-          deltaTime,
-          this.currentSpeed,
-          hasObstacles,
-          showNightMode
-        )
+        this.horizon.update(deltaTime, this.currentSpeed, hasObstacles, false)
       }
+
+      const pose = await this.poseEstimator.estimate()
+      pose.drawSkeleton(this.canvasCtx)
 
       // Check for collisions.
       const collision =
-        hasObstacles && checkForCollision(this.horizon.obstacles[0], this.tRex)
+        hasObstacles &&
+        pose.score > 0.1 &&
+        checkForCollision(this.horizon.obstacles[0], pose, this.canvasCtx)
 
       if (!collision) {
         this.distanceRan += (this.currentSpeed * deltaTime) / this.msPerFrame
@@ -606,29 +607,9 @@ Runner.prototype = {
       if (playAchievementSound) {
         this.playSound(this.soundFx.SCORE)
       }
-
-      // Night mode.
-      if (this.invertTimer > this.config.INVERT_FADE_DURATION) {
-        this.invertTimer = 0
-        this.invertTrigger = false
-        this.invert(false)
-      } else if (this.invertTimer) {
-        this.invertTimer += deltaTime
-      } else {
-        const actualDistance = this.distanceMeter.getActualDistance(
-          Math.ceil(this.distanceRan)
-        )
-
-        if (actualDistance > 0) {
-          this.invertTrigger = !(actualDistance % this.config.INVERT_DISTANCE)
-
-          if (this.invertTrigger && this.invertTimer === 0) {
-            this.invertTimer += deltaTime
-            this.invert(false)
-          }
-        }
-      }
     }
+
+    this.updatePending = false
 
     if (
       this.playing ||
@@ -1383,23 +1364,19 @@ GameOverPanel.prototype = {
 /**
  * Check for a collision.
  * @param {!Obstacle} obstacle
- * @param {!Trex} tRex T-rex object.
+ * @param {!Pose} pose pose
  * @param {CanvasRenderingContext2D=} opt_canvasCtx Optional canvas context for
  *    drawing collision boxes.
- * @return {Array<CollisionBox>|undefined}
+ * @return {boolean}
  */
-function checkForCollision(obstacle, tRex, opt_canvasCtx) {
-  const obstacleBoxXPos = Runner.defaultDimensions.WIDTH + obstacle.xPos
-
-  // Adjustments are made to the bounding box as there is a 1 pixel white
-  // border around the t-rex and obstacles.
-  const tRexBox = new CollisionBox(
-    tRex.xPos + 1,
-    tRex.yPos + 1,
-    tRex.config.WIDTH - 2,
-    tRex.config.HEIGHT - 2
+function checkForCollision(obstacle, pose, opt_canvasCtx) {
+  const poseBox = pose.boundingBox()
+  const playerBox = new CollisionBox(
+    poseBox.x,
+    poseBox.y,
+    poseBox.width,
+    poseBox.height
   )
-
   const obstacleBox = new CollisionBox(
     obstacle.xPos + 1,
     obstacle.yPos + 1,
@@ -1407,43 +1384,23 @@ function checkForCollision(obstacle, tRex, opt_canvasCtx) {
     obstacle.typeConfig.height - 2
   )
 
-  // Debug outer box
-  if (opt_canvasCtx) {
-    drawCollisionBoxes(opt_canvasCtx, tRexBox, obstacleBox)
+  if (!boxCompare(poseBox, obstacleBox)) {
+    return false
   }
 
-  // Simple outer bounds check.
-  if (boxCompare(tRexBox, obstacleBox)) {
-    const collisionBoxes = obstacle.collisionBoxes
-    const tRexCollisionBoxes = tRex.ducking
-      ? Trex.collisionBoxes.DUCKING
-      : Trex.collisionBoxes.RUNNING
+  const collisionBoxes = obstacle.collisionBoxes
+  for (let i = 0; i < collisionBoxes.length; i++) {
+    const adjObstacleBox = createAdjustedCollisionBox(
+      collisionBoxes[i],
+      obstacleBox
+    )
 
-    // Detailed axis aligned box check.
-    for (let t = 0; t < tRexCollisionBoxes.length; t++) {
-      for (let i = 0; i < collisionBoxes.length; i++) {
-        // Adjust the box to actual positions.
-        const adjTrexBox = createAdjustedCollisionBox(
-          tRexCollisionBoxes[t],
-          tRexBox
-        )
-        const adjObstacleBox = createAdjustedCollisionBox(
-          collisionBoxes[i],
-          obstacleBox
-        )
-        const crashed = boxCompare(adjTrexBox, adjObstacleBox)
-
-        // Draw boxes for debug.
-        if (opt_canvasCtx) {
-          drawCollisionBoxes(opt_canvasCtx, adjTrexBox, adjObstacleBox)
-        }
-
-        if (crashed) {
-          return [adjTrexBox, adjObstacleBox]
-        }
-      }
+    if (pose.skeletonIntersects(adjObstacleBox)) {
+      return true
     }
   }
+
+  return false
 }
 
 /**
@@ -1707,7 +1664,7 @@ Obstacle.prototype = {
       this.width * speed + this.typeConfig.minGap * gapCoefficient
     )
     const maxGap = Math.round(minGap * Obstacle.MAX_GAP_COEFFICIENT)
-    return getRandomNum(minGap, maxGap)
+    return 3 * getRandomNum(minGap, maxGap)
   },
 
   /**
@@ -2011,6 +1968,7 @@ Trex.prototype = {
    * @param {number} y
    */
   draw(x, y) {
+    return
     let sourceX = x
     let sourceY = y
     let sourceWidth =
