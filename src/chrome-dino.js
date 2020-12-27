@@ -1969,58 +1969,6 @@ Trex.prototype = {
    */
   draw(x, y) {
     return
-    let sourceX = x
-    let sourceY = y
-    let sourceWidth =
-      this.ducking && this.status !== Trex.status.CRASHED
-        ? this.config.WIDTH_DUCK
-        : this.config.WIDTH
-    let sourceHeight = this.config.HEIGHT
-    const outputHeight = sourceHeight
-
-    if (IS_HIDPI) {
-      sourceX *= 2
-      sourceY *= 2
-      sourceWidth *= 2
-      sourceHeight *= 2
-    }
-
-    // Adjustments for sprite sheet position.
-    sourceX += this.spritePos.x
-    sourceY += this.spritePos.y
-
-    // Ducking.
-    if (this.ducking && this.status !== Trex.status.CRASHED) {
-      this.canvasCtx.drawImage(
-        Runner.imageSprite,
-        sourceX,
-        sourceY,
-        sourceWidth,
-        sourceHeight,
-        this.xPos,
-        this.yPos,
-        this.config.WIDTH_DUCK,
-        outputHeight
-      )
-    } else {
-      // Crashed whilst ducking. Trex is standing up so needs adjustment.
-      if (this.ducking && this.status === Trex.status.CRASHED) {
-        this.xPos++
-      }
-      // Standing / running
-      this.canvasCtx.drawImage(
-        Runner.imageSprite,
-        sourceX,
-        sourceY,
-        sourceWidth,
-        sourceHeight,
-        this.xPos,
-        this.yPos,
-        this.config.WIDTH,
-        outputHeight
-      )
-    }
-    this.canvasCtx.globalAlpha = 1
   },
 
   /**
