@@ -128,7 +128,7 @@ export class Pose {
 }
 
 export async function createPoseEstimator(): Promise<PoseEstimator> {
-  const video = document.getElementById('video') as HTMLVideoElement
+  const video = document.createElement('video')
   await setupCamera(video)
   const net = await posenet.load({
     architecture: 'ResNet50',
