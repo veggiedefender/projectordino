@@ -1,6 +1,6 @@
 # projectordino
 
-The Chrome T-Rex game, except the dinosaur is **_YOU!_**
+The Chrome T-Rex game, except the dinosaur is **_YOU!_** (using a projector, webcam, and computer vision magic)
 
 <a href="https://twitter.com/__jesse_li/status/1342946520879005703">
   <img src="https://user-images.githubusercontent.com/8890878/103162430-a6a32480-47be-11eb-96a7-54400befae56.png" alt="gameplay video screenshot" width="500">
