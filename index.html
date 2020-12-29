@@ -5,8 +5,8 @@
     <title><%= htmlWebpackPlugin.options.title %></title>
     <style>
       body {
-        font-family: sans-serif;
         background-color: black;
+        font-family: sans-serif;
         overflow: hidden;
       }
 
@@ -15,10 +15,10 @@
       }
 
       #game-container {
-        width: 600px;
-        transform-origin: top left;
-        touch-action: none;
         box-sizing: border-box;
+        touch-action: none;
+        transform-origin: top left;
+        width: 600px;
       }
 
       #game {
@@ -26,21 +26,21 @@
       }
 
       #controls {
-        position: fixed;
-        top: 0;
-        right: 0;
-        opacity: 0;
-        transition: opacity 0.2s ease;
         margin: 0;
+        opacity: 0;
         padding: 8px 8px 32px 32px;
+        position: fixed;
+        right: 0;
+        top: 0;
+        transition: opacity 0.2s ease;
       }
 
       #controls button {
-        padding: 8px 16px;
+        clear:right;
         display: block;
         float:right;
-        clear:right;
         margin-bottom: 4px;
+        padding: 8px 16px;
       }
 
       #controls:hover {
