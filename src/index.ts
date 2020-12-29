@@ -103,6 +103,12 @@ async function main() {
   document.getElementById('calibration')?.addEventListener('click', () => {
     window.open('calibration.html', 'calibration', 'width=600,height=500')
   })
+
+  document.getElementById('reset')?.addEventListener('click', () => {
+    Object.assign(position, { x: 0, y: 0, scale: 1.0 })
+    storePosition(position)
+    setGamePosition(position)
+  })
 }
 
 main()

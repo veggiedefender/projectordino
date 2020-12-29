@@ -25,17 +25,25 @@
         width: 100%;
       }
 
-      #calibration {
+      #controls {
         position: fixed;
         top: 0;
         right: 0;
         opacity: 0;
         transition: opacity 0.2s ease;
         margin: 0;
-        padding: 16px;
+        padding: 8px 8px 32px 32px;
       }
 
-      #calibration:hover {
+      #controls button {
+        padding: 8px 16px;
+        display: block;
+        float:right;
+        clear:right;
+        margin-bottom: 4px;
+      }
+
+      #controls:hover {
         opacity: 1;
       }
     </style>
@@ -44,7 +52,10 @@
     <div id="game-container">
       <div id="game"></div>
     </div>
-    <button id="calibration">calibration</button>
+    <div id="controls">
+      <button id="calibration">calibration</button>
+      <button id="reset">reset position</button>
+    </div>
 
     <div id="offline-resources">
       <img
