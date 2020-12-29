@@ -9,7 +9,10 @@ const messages = [
 ]
 
 function updateMessage(numCoords: number) {
-  document.getElementById('message').innerText = messages[numCoords]
+  const elem = document.getElementById('message')
+  if (elem) {
+    elem.innerText = messages[numCoords]
+  }
 }
 
 async function main() {
@@ -30,7 +33,7 @@ async function main() {
     if (coords.length == 4) {
       window.opener.postMessage({
         type: 'coords',
-        data: [].concat.apply([], coords), // flattened
+        data: ([] as number[]).concat(...coords),
       })
     }
 

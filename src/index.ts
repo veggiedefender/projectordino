@@ -26,11 +26,6 @@ async function main() {
   const runner = new Runner('#game', poseEstimator)
   runner.invert(false)
 
-  drawCalibrationTarget(runner.canvasCtx, 40, 30)
-  drawCalibrationTarget(runner.canvasCtx, 560, 30)
-  drawCalibrationTarget(runner.canvasCtx, 560, 120)
-  drawCalibrationTarget(runner.canvasCtx, 40, 120)
-
   const position = { x: 0, y: 0, scale: 1.0 }
   interact('#game-container')
     .draggable({
@@ -59,7 +54,14 @@ async function main() {
       },
     })
 
-  window.addEventListener('message', function (e) {
+  if (runner.canvasCtx) {
+    drawCalibrationTarget(runner.canvasCtx, 40, 30)
+    drawCalibrationTarget(runner.canvasCtx, 560, 30)
+    drawCalibrationTarget(runner.canvasCtx, 560, 120)
+    drawCalibrationTarget(runner.canvasCtx, 40, 120)
+  }
+
+  window.addEventListener('message', (e) => {
     if (!(e.data.type && e.data.type === 'coords')) {
       return
     }
@@ -69,7 +71,7 @@ async function main() {
     console.log('Received calibration coordinates', srcCorners)
   })
 
-  document.getElementById('calibration').addEventListener('click', function () {
+  document.getElementById('calibration')?.addEventListener('click', () => {
     window.open('calibration.html', 'calibration', 'width=600,height=500')
   })
 }
