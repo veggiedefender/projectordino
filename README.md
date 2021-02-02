@@ -25,6 +25,8 @@ To make this project, I duct-taped the following pieces together:
 
 As you can see, very little of this game is made by me — I just put together the pieces in a new way. But that's more or less how we make all software :)
 
+You can read a more detailed writeup on my blog: https://blog.jse.li/posts/projectordino/
+
 ## Running
 A pre-compiled version is hosted on my website: https://jse.li/projectordino/
 
