@@ -3,6 +3,13 @@ import interact from 'interactjs'
 
 import { Runner } from './chrome-dino'
 import { createPoseEstimator } from './pose'
+import useLocalStorage from './localstorage'
+
+interface Position {
+  x: number
+  y: number
+  scale: number
+}
 
 function drawCalibrationTarget(
   ctx: CanvasRenderingContext2D,
@@ -21,24 +28,39 @@ function drawCalibrationTarget(
   ctx.fill()
 }
 
+function setGamePosition(pos: Position) {
+  const elem = document.getElementById('game-container')
+  if (elem) {
+    elem.style.transform = `translate(${pos.x}px, ${pos.y}px) scale(${pos.scale})`
+  }
+}
+
 async function main() {
   const poseEstimator = await createPoseEstimator()
   const runner = new Runner('#game', poseEstimator)
   runner.invert(false)
 
-  drawCalibrationTarget(runner.canvasCtx, 40, 30)
-  drawCalibrationTarget(runner.canvasCtx, 560, 30)
-  drawCalibrationTarget(runner.canvasCtx, 560, 120)
-  drawCalibrationTarget(runner.canvasCtx, 40, 120)
+  const [position, storePosition] = useLocalStorage<Position>('position', {
+    x: 0,
+    y: 0,
+    scale: 1.0,
+  })
+  const [calibration, storeCalibration] = useLocalStorage<QuadPoints>(
+    'calibration',
+    [0, 0, 0, 0, 0, 0, 0, 0]
+  )
 
-  const position = { x: 0, y: 0, scale: 1.0 }
+  setGamePosition(position)
+  poseEstimator.setCalibrationPoints(calibration)
+
   interact('#game-container')
     .draggable({
       listeners: {
         move(event) {
           position.x += event.dx
           position.y += event.dy
-          event.target.style.transform = `translate(${position.x}px, ${position.y}px) scale(${position.scale})`
+          storePosition(position)
+          setGamePosition(position)
         },
       },
     })
@@ -54,23 +76,38 @@ async function main() {
           position.x += event.deltaRect.left
           position.y += event.deltaRect.top
           position.scale = event.rect.width / 600
-          event.target.style.transform = `translate(${position.x}px, ${position.y}px) scale(${position.scale})`
+          storePosition(position)
+          setGamePosition(position)
         },
       },
     })
 
-  window.addEventListener('message', function (e) {
+  if (runner.canvasCtx) {
+    drawCalibrationTarget(runner.canvasCtx, 40, 30)
+    drawCalibrationTarget(runner.canvasCtx, 560, 30)
+    drawCalibrationTarget(runner.canvasCtx, 560, 120)
+    drawCalibrationTarget(runner.canvasCtx, 40, 120)
+  }
+
+  window.addEventListener('message', (e) => {
     if (!(e.data.type && e.data.type === 'coords')) {
       return
     }
 
     const srcCorners = e.data.data as QuadPoints
+    storeCalibration(srcCorners)
     poseEstimator.setCalibrationPoints(srcCorners)
     console.log('Received calibration coordinates', srcCorners)
   })
 
-  document.getElementById('calibration').addEventListener('click', function () {
+  document.getElementById('calibration')?.addEventListener('click', () => {
     window.open('calibration.html', 'calibration', 'width=600,height=500')
+  })
+
+  document.getElementById('reset')?.addEventListener('click', () => {
+    Object.assign(position, { x: 0, y: 0, scale: 1.0 })
+    storePosition(position)
+    setGamePosition(position)
   })
 }
 

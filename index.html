@@ -5,8 +5,8 @@
     <title><%= htmlWebpackPlugin.options.title %></title>
     <style>
       body {
-        font-family: sans-serif;
         background-color: black;
+        font-family: sans-serif;
         overflow: hidden;
       }
 
@@ -15,27 +15,35 @@
       }
 
       #game-container {
-        width: 600px;
-        transform-origin: top left;
-        touch-action: none;
         box-sizing: border-box;
+        touch-action: none;
+        transform-origin: top left;
+        width: 600px;
       }
 
       #game {
         width: 100%;
       }
 
-      #calibration {
-        position: fixed;
-        top: 0;
-        right: 0;
-        opacity: 0;
-        transition: opacity 0.2s ease;
+      #controls {
         margin: 0;
-        padding: 16px;
+        opacity: 0;
+        padding: 8px 8px 32px 32px;
+        position: fixed;
+        right: 0;
+        top: 0;
+        transition: opacity 0.2s ease;
       }
 
-      #calibration:hover {
+      #controls button {
+        clear:right;
+        display: block;
+        float:right;
+        margin-bottom: 4px;
+        padding: 8px 16px;
+      }
+
+      #controls:hover {
         opacity: 1;
       }
     </style>
@@ -44,7 +52,10 @@
     <div id="game-container">
       <div id="game"></div>
     </div>
-    <button id="calibration">calibration</button>
+    <div id="controls">
+      <button id="calibration">calibration</button>
+      <button id="reset">reset position</button>
+    </div>
 
     <div id="offline-resources">
       <img
